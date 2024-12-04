@@ -22,7 +22,7 @@
 
             <div>
                 <label for="weight">Hybrid Query Weight:</label>
-                <input type="number" min="0" max="1" id="weight" name="weight">
+                <input type="number" min="0" max="1" id="weight" name="weight" step="any">
             </div>
 
             <div>
@@ -37,9 +37,14 @@
             <button type="submit">Search</button>
         </form>
 
-        {% if img %}
-            <img src="static/{{ img }}" alt="oops">
-        {% endif %}
+
+        {% for img in imgs %}
+            <div>
+                <img src="static/{{ img[0] }}" alt="oops">
+                <div>{{ img[1] }}</div>
+            </div>
+        {% endfor %}
+
 
     </div>
 

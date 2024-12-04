@@ -4,3 +4,4 @@ numpy
 open-clip-torch
 torch
 scikit-learn
+pillow

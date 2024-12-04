@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import open_clip
 from open_clip import create_model_and_transforms, tokenizer
 import torch.nn.functional as F
+from PIL import Image
 
 df = pd.read_pickle("image_embeddings.pickle")
 
@@ -18,9 +19,18 @@ def find_most_similar_image(df, new_embedding):
 
     similarities = cosine_similarity(new_embedding, embeddings)
 
-    most_similar_idx = np.argmax(similarities)
+    sorted_indicies = np.argsort(similarities.flatten())[::-1]
 
-    return df.iloc[most_similar_idx]["file_name"]
+    top_indices = sorted_indicies[:5]
+
+    top_image_paths = df.iloc[top_indices]["file_name"].values
+
+    top_similarities = similarities.flatten()[sorted_indicies]
+
+    return zip(top_image_paths, top_similarities)
+    # most_similar_idx = np.argmax(similarities)
+
+    # return df.iloc[most_similar_idx]["file_name"]
 
 def image_query(file):
 
@@ -42,6 +52,7 @@ def text_query(query):
 def hybrid_query(file, query, weight):
     image = preprocess(file).unsqueeze(0)
     image_query = F.normalize(model.encode_image(image))
+    tokenizer = open_clip.get_tokenizer('ViT-B-32')
     text = tokenizer([query])
     text_query = F.normalize(model.encode_text(text))
 
@@ -57,7 +68,7 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET"])
 def index():
-    return render_template("index.html")
+    return render_template("index.html", imgs=[])
 
 @app.route("/search", methods=["POST"])
 def search():
@@ -70,22 +81,22 @@ def search():
 
     query_type = request.form["type"]
 
-    app.logger.info(f"Type: {query_type}")
+
+    file.save(f"uploads/{file.filename}")
 
     if query_type == "Image":
-        app.logger.info("In image query")
-        img = image_query(file)
+    
+        uploaded_image = Image.open(f"uploads/{file.filename}")
+
+        imgs = image_query(uploaded_image)
     elif query_type == "Text":
-        app.logger.info("In text query")
-        img = text_query(query)
+        imgs = text_query(query)
     else:
-        app.logger.info("In hybrid query")
-        img = hybrid_query(file, query, weight)
+        uploaded_image = Image.open(f"uploads/{file.filename}")
 
-    return render_template("index.html", img=img)
+        imgs = hybrid_query(uploaded_image, query, weight)
 
-    # TODO: Make it so that app can route images in dataset correctly
-    # move to a static folder?
+    return render_template("index.html", imgs=imgs)
 
 if __name__ == "__main__":
     app.run(port=3000, host="0.0.0.0", debug=True)
