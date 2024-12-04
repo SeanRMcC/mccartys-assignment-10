@@ -6,6 +6,42 @@
     <title>Image Search</title>
 </head>
 <body>
-    <h1>Image Search</h1>
+    <div class="container">
+        <h1>Image Search</h1>
+        <form method="POST" action="/search" enctype="multipart/form-data">
+
+            <div>
+                <label for="file">Image query:</label>
+                <input type="file" id="file" name="file">
+            </div>
+
+            <div>
+                <label for="query">Text query:</label>
+                <input type="text" id="query" name="query">
+            </div>
+
+            <div>
+                <label for="weight">Hybrid Query Weight:</label>
+                <input type="number" min="0" max="1" id="weight" name="weight">
+            </div>
+
+            <div>
+                <label for="type">Select query type:</label>
+                <select name="type" id="type">
+                    <option value="Image">Image query</option>
+                    <option value="Text">Text query</option>
+                    <option value="Hybrid">Hybrid query</option>
+                </select>
+            </div>
+
+            <button type="submit">Search</button>
+        </form>
+
+        {% if img %}
+            <img src="static/{{ img }}" alt="oops">
+        {% endif %}
+
+    </div>
+
 </body>
 </html>
