@@ -1,5 +1,8 @@
 static
 coco_images_resized.zip
 image_embeddings.pickle
+img_names.pkl
+pca.pkl
+embeddings.pkl
 house.jpg
 .DS_Store
